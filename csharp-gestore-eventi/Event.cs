@@ -44,10 +44,10 @@ namespace csharp_gestore_eventi
 
         public void BookSeats(int seatsToBook)
         {
-            ValidateSeatsToBook(seatsToBook);
+            ValidateSeatsToBook();
             this.BookedSeats += seatsToBook;
 
-            void ValidateSeatsToBook(int seatsToBook)
+            void ValidateSeatsToBook()
             {
                 if (seatsToBook <= 0)
                     throw new ArgumentException("Field must be greater than zero", "seatsToBook");
@@ -63,10 +63,10 @@ namespace csharp_gestore_eventi
 
         public void CancelBookedSeats(int seatsToCancel)
         {
-            ValidateSeatsToCancel(seatsToCancel);
+            ValidateSeatsToCancel();
             this.BookedSeats -= seatsToCancel;
 
-            void ValidateSeatsToCancel(int seatsToCancel)
+            void ValidateSeatsToCancel()
             {
                 if (seatsToCancel <= 0)
                     throw new ArgumentException("Field must be greater than zero", "seatsToCancel");
