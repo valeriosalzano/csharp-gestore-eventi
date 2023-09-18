@@ -61,6 +61,30 @@ namespace csharp_gestore_eventi
             }
         }
 
+        public void CancelBookedSeats(int seatsToCancel)
+        {
+            ValidateSeatsToCancel(seatsToCancel);
+            this.BookedSeats -= seatsToCancel;
+
+            void ValidateSeatsToCancel(int seatsToCancel)
+            {
+                if (seatsToCancel <= 0)
+                    throw new ArgumentException("Field must be greater than zero", "seatsToCancel");
+
+                DateTime today = DateTime.Today;
+                if (today >= this.Date)
+                    throw new Exception("Cannot cancel seats, event is already ended");
+
+                if (this.BookedSeats < seatsToCancel)
+                    throw new Exception($"Cannot cancel more than {this.BookedSeats} seats.");
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{this.Date.ToString("dd/MM/yyyy")} - {this.Title}";
+        }
+
         // SETTERS
         private void SetTitle(string title)
         {
