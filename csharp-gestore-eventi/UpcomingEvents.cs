@@ -11,7 +11,7 @@ namespace csharp_gestore_eventi
     internal class UpcomingEvents
     {
         //ATTRIBUTES
-        private string title;
+        private string title = "";
 
         // PROPERTIES
         public string Title {

@@ -82,7 +82,7 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
 
         public static Event CreateEvent()
         {
-            string userTitle;
+            string? userTitle;
             DateTime userDate;
             int userSeatsCapacity;
 
@@ -159,7 +159,7 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
 
             string GetTitleFromUser()
             {
-                string userTitle;
+                string? userTitle;
                 Console.Write("Inserisci il nome del tuo programma Eventi: ");
                 userTitle = Console.ReadLine();
 

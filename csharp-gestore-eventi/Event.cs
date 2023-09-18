@@ -9,7 +9,7 @@ namespace csharp_gestore_eventi
     internal class Event
     {
         // ATTRIBUTES
-        private string title;
+        private string title = "";
         private DateTime date;
         private int maxSeatsCapacity;
 
@@ -26,7 +26,7 @@ namespace csharp_gestore_eventi
         }
         public int MaxSeatsCapacity {
             get { return this.maxSeatsCapacity; }
-            private set { SetMaxSeatsCapacity(value); }
+            protected set { SetMaxSeatsCapacity(value); }
         }
         public int BookedSeats { get; private set; }
 
