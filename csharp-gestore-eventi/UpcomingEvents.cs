@@ -54,5 +54,19 @@ namespace csharp_gestore_eventi
             return result;
         }
 
+        public int CountEvents()
+        {
+            return Events.Count();
+        }
+
+        public void ClearEventsList()
+        {
+            Events.Clear();
+        }
+
+        public override string ToString()
+        {
+            return Title + "\n\t" + ListToString(Events);
+        }
     }
 }
