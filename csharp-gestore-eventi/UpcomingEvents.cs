@@ -58,6 +58,7 @@ namespace csharp_gestore_eventi
         public void AddEvent(Event newEvent)
         {
             this.Events.Add(newEvent);
+            this.Events.Sort((x, y) => DateTime.Compare(x.Date, y.Date));
         }
 
         public static string ListToString(List<Event> events)
