@@ -1,4 +1,6 @@
-﻿namespace csharp_gestore_eventi
+﻿using System.Runtime.InteropServices;
+
+namespace csharp_gestore_eventi
 {
     internal class Program
     {
@@ -11,56 +13,77 @@
             {
                 Console.WriteLine(
                     @"
-                    ***** Menu *****
-                    1 - Crea un evento
-                    2 - Prenota posti all'evento
-                    3 - Disdici posti a un evento
-                    0 - Esci
+***** Menu *****
+1 - Crea un evento
+0 - Esci
                     ");
                 userChoice = Console.ReadLine()?? "";
 
                 switch (userChoice)
                 {
                     case "1":
-                        AddEvent();
+                        userEvent = CreateEvent();
+                        break;
+                    case "0":
+                        Console.WriteLine("Arrivederci");
+                        break;
+                    default:
+                        Console.WriteLine("Comando non riconosciuto");
                         break;
 
                 }
             } while (userChoice != "0");
         }
 
-        public static void AddEvent() 
+        public static Event CreateEvent() 
         {
             string userTitle;
             DateTime userDate;
+            int userSeatsCapacity;
+            Event userEvent;
+            int userBookedSeats;
 
             Console.WriteLine("--- Aggiunta di un evento ---");
 
-            
             Console.Write("Inserisci il nome dell'evento: ");
-            while (!IsUserTitleValid()) 
-                Console.Write("Inserisci un nome valido: ");
+            userTitle = Console.ReadLine() ?? "";
 
             Console.Write("Inserisci la data dell'evento (gg/mm/yyyy): ");
-            while (!IsUserDateValid())
-                Console.Write("Inserisci una data valida (gg/mm/yyyy): ");
+            userDate = DateTime.Parse(Console.ReadLine() ?? "");
 
-            bool IsUserTitleValid()
+            Console.Write("Inserisci il numero di posti totali: ");
+            int.TryParse(Console.ReadLine(),out userSeatsCapacity);
+
+            userEvent = new Event(userTitle, userDate, userSeatsCapacity);
+
+            Console.Write("Quanti posti desideri prenotare? ");
+            int.TryParse(Console.ReadLine(), out userBookedSeats);
+            userEvent.BookSeats(userBookedSeats);
+
+            bool userCanCancel = true;
+            while(userCanCancel)
             {
-                userTitle = Console.ReadLine() ?? "";
+                Console.Write("Vuoi disdire dei posti? (si/no) ");
+                if(Console.ReadLine() == "si")
+                {
+                    int userSeatsToCancel;
 
-                if (string.IsNullOrEmpty(userTitle))
-                    return false;
-                else
-                    return true;
+                    Console.Write("Indica il numero di posti da disdire: ");
+                    int.TryParse(Console.ReadLine(), out userSeatsToCancel);
+                    userEvent.CancelBookedSeats(userSeatsToCancel);
 
+                }else
+                {
+                    userCanCancel = false;
+                    Console.WriteLine("Ok va bene!");
+                }
+                Console.WriteLine(@$"
+Numero di posti prenotati: {userEvent.BookedSeats}
+Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats}
+                ");
             }
-            bool IsUserDateValid()
-            {
-                return true;
-            }
 
-
+            return userEvent;
         }
     }
 }
