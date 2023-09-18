@@ -19,7 +19,10 @@ namespace csharp_gestore_eventi
 1 - Crea un evento (eccezioni non gestite)
 2 - Crea un programma di eventi
 0 - Esci
+****************
                     ");
+
+                Console.Write("Inserisci il numero del comando desiderato: ");
                 userChoice = Console.ReadLine()?? "";
 
                 switch (userChoice)
@@ -31,10 +34,10 @@ namespace csharp_gestore_eventi
                         userUpcomingEvents = CreateUpcomingEventsList();
                         break;
                     case "0":
-                        Console.WriteLine("Arrivederci");
+                        Console.WriteLine("Arrivederci\n");
                         break;
                     default:
-                        Console.WriteLine("Comando non riconosciuto");
+                        Console.WriteLine("Comando non riconosciuto\n");
                         break;
 
                 }
@@ -83,10 +86,15 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
             DateTime userDate;
             int userSeatsCapacity;
 
-            Console.WriteLine("--- Aggiunta di un evento ---");
+            Console.WriteLine("\n--- Aggiunta di un evento ---\n");
 
             Console.Write("Inserisci il nome dell'evento: ");
-            userTitle = Console.ReadLine() ?? "";
+            userTitle = Console.ReadLine();
+            while(string.IsNullOrEmpty(userTitle))
+            {
+                Console.Write("Inserisci un titolo valido: ");
+                userTitle = Console.ReadLine();
+            }
 
             Console.Write("Inserisci la data dell'evento (gg/mm/yyyy): ");
             while (!DateTime.TryParseExact(Console.ReadLine(),"dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out userDate))
@@ -95,12 +103,17 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
             }
 
             Console.Write("Inserisci il numero di posti totali: ");
-            int.TryParse(Console.ReadLine(), out userSeatsCapacity);
+            while(!int.TryParse(Console.ReadLine(), out userSeatsCapacity))
+            {
+                Console.Write("Inserisci un numero valido: ");
+            }
+            
 
             return new Event(userTitle, userDate, userSeatsCapacity);
         }
         public static UpcomingEvents CreateUpcomingEventsList()
         {
+            Console.WriteLine("\n--- Aggiunta di un nuovo programma di eventi ---\n");
 
             string userTitle = GetTitleFromUser();
 
@@ -115,14 +128,31 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
                     Event newEvent = CreateEvent();
                     userUpcomingEvents.Events.Add(newEvent);
 
-                }catch (ArgumentException error)
-                {
-                    Console.WriteLine($"Errore relativo a: {error.ParamName}. {error.InnerException}.");
-
                 }catch (Exception error) 
                 {
                     Console.WriteLine(error.Message);
                 }
+            }
+
+            Console.WriteLine($"\nIl numero di eventi nel programma è: {userUpcomingEvents.CountEvents()} \nEcco il tuo programma eventi:\n{userUpcomingEvents.ToString()}");
+
+            DateTime searchedDate;
+            Console.Write("Inserisci una data per sapere che eventi ci saranno (gg/mm/yyyy): ");
+            while(!DateTime.TryParse(Console.ReadLine(),out searchedDate))
+            {
+                Console.Write("Inserisci un formato di data valido: ");
+            }
+            List<Event> eventsList = SearchEventsByDate(searchedDate);
+            if(eventsList.Count > 0)
+            {
+                foreach (Event _event in eventsList)
+                {
+                    Console.WriteLine(_event.ToString());
+                }
+            }
+            else
+            {
+                Console.WriteLine("Nessun evento trovato per la data selezionata.");
             }
 
             return userUpcomingEvents;
@@ -154,6 +184,13 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
 
                 return eventsListCount;
 
+            }
+
+            List<Event> SearchEventsByDate(DateTime date)
+            {
+                List<Event> eventsFound = userUpcomingEvents.GetEventsByDate(date);
+
+                return eventsFound;
             }
         }
     }

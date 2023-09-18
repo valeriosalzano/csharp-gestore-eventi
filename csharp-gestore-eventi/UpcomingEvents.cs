@@ -47,7 +47,7 @@ namespace csharp_gestore_eventi
         private void SetTitle(string title)
         {
             if (string.IsNullOrEmpty(title))
-                throw new ArgumentException("This field cannot be empty or null.", "Title");
+                throw new Exception("Il titolo non può essere vuoto.");
             else
                 this.title = title;
 
@@ -83,7 +83,13 @@ namespace csharp_gestore_eventi
 
         public override string ToString()
         {
-            return Title + "\n\t" + ListToString(Events);
+            string result = Title + "\n";
+            foreach( Event _event in Events)
+            {
+                result += "\t" +_event.ToString()+"\n";
+            }
+
+            return result;
         }
     }
 }

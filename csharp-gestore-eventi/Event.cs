@@ -50,14 +50,14 @@ namespace csharp_gestore_eventi
             void ValidateSeatsToBook()
             {
                 if (seatsToBook <= 0)
-                    throw new ArgumentException("Field must be greater than zero", "seatsToBook");
+                    throw new Exception("Il numero di posti da prenotare deve essere maggiore di zero.");
 
                 DateTime today = DateTime.Today;
                 if (today >= this.Date)
-                    throw new Exception("Cannot book seats, event is already ended");
+                    throw new Exception("Impossibile effettuare prenotazioni, l'evento è già terminato.");
 
                 if (this.BookedSeats + seatsToBook > this.MaxSeatsCapacity)
-                    throw new Exception($"Cannot book more than {this.MaxSeatsCapacity - this.BookedSeats} seats.");
+                    throw new Exception($"Impossibile prenotare più di {this.MaxSeatsCapacity - this.BookedSeats} posti.");
             }
         }
 
@@ -69,14 +69,14 @@ namespace csharp_gestore_eventi
             void ValidateSeatsToCancel()
             {
                 if (seatsToCancel <= 0)
-                    throw new ArgumentException("Field must be greater than zero", "seatsToCancel");
+                    throw new Exception("Il numero di prenotazioni deve essere maggiore di zero.");
 
                 DateTime today = DateTime.Today;
                 if (today >= this.Date)
-                    throw new Exception("Cannot cancel seats, event is already ended");
+                    throw new Exception("Impossibile cancellare le prenotazioni, l'evento è già terminato.");
 
                 if (this.BookedSeats < seatsToCancel)
-                    throw new Exception($"Cannot cancel more than {this.BookedSeats} seats.");
+                    throw new Exception($"Impossibile cancellare più di {this.BookedSeats} prenotazioni.");
             }
         }
 
@@ -89,7 +89,7 @@ namespace csharp_gestore_eventi
         private void SetTitle(string title)
         {
             if (string.IsNullOrEmpty(title))
-                throw new ArgumentException("This field cannot be empty or null.", "Title");
+                throw new Exception("Il campo titolo non può essere vuoto o nullo.");
             else
                 this.title = title;
 
@@ -99,7 +99,7 @@ namespace csharp_gestore_eventi
         {
             DateTime today = DateTime.Today;
             if (date <= today)
-                throw new ArgumentException($"Dates before {today.AddDays(1)} are not valid.", "Date");
+                throw new Exception($"Le date precedenti al {today.AddDays(1).ToShortDateString()} non sono valide.");
             else
                 this.date = date;
 
@@ -108,7 +108,7 @@ namespace csharp_gestore_eventi
         private void SetMaxSeatsCapacity(int seats)
         {
             if (seats <= 0)
-                throw new ArgumentException("This field must be greater than zero", "MaxSeatsCapacity");
+                throw new Exception("Il numero di posti disponibili deve essere maggiore di zero.");
             else
                 this.maxSeatsCapacity = seats;
 
