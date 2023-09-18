@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace csharp_gestore_eventi
 {
@@ -15,7 +16,7 @@ namespace csharp_gestore_eventi
                 Console.WriteLine(
                     @"
 ***** Menu *****
-1 - Crea un evento
+1 - Crea un evento (eccezioni non gestite)
 2 - Crea un programma di eventi
 0 - Esci
                     ");
@@ -88,7 +89,10 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
             userTitle = Console.ReadLine() ?? "";
 
             Console.Write("Inserisci la data dell'evento (gg/mm/yyyy): ");
-            userDate = DateTime.Parse(Console.ReadLine() ?? "");
+            while (!DateTime.TryParseExact(Console.ReadLine(),"dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out userDate))
+            {
+                Console.Write("Inserisci un formato di data valido: ");
+            }
 
             Console.Write("Inserisci il numero di posti totali: ");
             int.TryParse(Console.ReadLine(), out userSeatsCapacity);
@@ -104,10 +108,24 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
 
             int eventsListCount = GetListLengthFromUser();
 
-            for(int i = 0; i < eventsListCount; i++)
+            while(userUpcomingEvents.CountEvents() < eventsListCount)
             {
+                try
+                {
+                    Event newEvent = CreateEvent();
+                    userUpcomingEvents.Events.Add(newEvent);
 
+                }catch (ArgumentException error)
+                {
+                    Console.WriteLine($"Errore relativo a: {error.ParamName}. {error.InnerException}.");
+
+                }catch (Exception error) 
+                {
+                    Console.WriteLine(error.Message);
+                }
             }
+
+            return userUpcomingEvents;
 
             string GetTitleFromUser()
             {
@@ -117,7 +135,7 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
 
                 while (string.IsNullOrEmpty(userTitle))
                 {
-                    Console.Write("Inserisci un nome valido.");
+                    Console.Write("Inserisci un nome valido: ");
                     userTitle = Console.ReadLine();
                 }
                 return userTitle;
