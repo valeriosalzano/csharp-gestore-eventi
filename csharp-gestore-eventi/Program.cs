@@ -18,6 +18,7 @@ namespace csharp_gestore_eventi
 ***** Menu *****
 1 - Crea un evento (eccezioni non gestite)
 2 - Crea un programma di eventi
+3 - Crea un programma di eventi (BONUS)
 0 - Esci
 ****************
                     ");
@@ -28,10 +29,13 @@ namespace csharp_gestore_eventi
                 switch (userChoice)
                 {
                     case "1":
-                        userEvent = CreateEventWithBookedSeats();
+                        userEvent = CreateEventWithBookedSeatsOperations();
                         break;
                     case "2":
                         userUpcomingEvents = CreateUpcomingEventsList();
+                        break;
+                    case "3":
+                        userUpcomingEvents = CreateUpcomingEventsListWithConference();
                         break;
                     case "0":
                         Console.WriteLine("Arrivederci\n");
@@ -44,7 +48,7 @@ namespace csharp_gestore_eventi
             } while (userChoice != "0");
         }
 
-        public static Event CreateEventWithBookedSeats() 
+        public static Event CreateEventWithBookedSeatsOperations() 
         {
             int userBookedSeats;
 
@@ -192,6 +196,63 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
 
                 return eventsFound;
             }
+        }
+
+        public static UpcomingEvents CreateUpcomingEventsListWithConference()
+        {
+            UpcomingEvents userUpcomingEvents = CreateUpcomingEventsList();
+
+            Console.WriteLine("---- BONUS ----\n\nAggiungiamo anche una conferenza!");
+            userUpcomingEvents.AddEvent(CreateConference());
+
+            Console.WriteLine($"\nIEcco il tuo programma eventi con conferenza inclusa:\n{userUpcomingEvents.ToString()}");
+            return userUpcomingEvents;
+        }
+        public static Conference CreateConference()
+        {
+            string? userTitle;
+            DateTime userDate;
+            int userSeatsCapacity;
+            string? userSpeaker;
+            double userPrice;
+
+            Console.WriteLine("\n--- Aggiunta di una conferenza ---\n");
+
+            Console.Write("Inserisci il nome della conferenza: ");
+            userTitle = Console.ReadLine();
+            while (string.IsNullOrEmpty(userTitle))
+            {
+                Console.Write("Inserisci un nome valido: ");
+                userTitle = Console.ReadLine();
+            }
+
+            Console.Write("Inserisci la data della conferenza (gg/mm/yyyy): ");
+            while (!DateTime.TryParseExact(Console.ReadLine(), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out userDate))
+            {
+                Console.Write("Inserisci un formato di data valido: ");
+            }
+
+            Console.Write("Inserisci il numero di posti per la conferenza: ");
+            while (!int.TryParse(Console.ReadLine(), out userSeatsCapacity))
+            {
+                Console.Write("Inserisci un numero valido: ");
+            }
+
+            Console.Write("Inserisci il relatore della conferenza: ");
+            userSpeaker = Console.ReadLine();
+            while (string.IsNullOrEmpty(userSpeaker))
+            {
+                Console.Write("Inserisci un nome valido: ");
+                userSpeaker = Console.ReadLine();
+            }
+
+            Console.Write("Inserisci il prezzo della conferenza: ");
+            while (!double.TryParse(Console.ReadLine(), out userPrice) || userPrice <= 0)
+            {
+                Console.Write("Inserisci un valore valido: ");
+            }
+
+            return new Conference(userTitle, userDate, userSeatsCapacity, userSpeaker, userPrice);
         }
     }
 }
