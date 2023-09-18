@@ -17,29 +17,18 @@ namespace csharp_gestore_eventi
         public string Title 
         {
             get { return this.title; }
-            set { 
-                ValidateTitle(value);
-                this.title = value;
-            }
+            set { SetTitle(value); }
         }
         public DateTime Date
         {
             get { return this.date; }
-            set 
-            { 
-                ValidateDate(value);
-                this.date = value;
-            }
+            set { SetDate(value); }
         }
         public int MaxSeatsCapacity {
             get { return this.maxSeatsCapacity; }
-            private set 
-            { 
-                ValidateMaxSeatsCapacity(value);
-                this.maxSeatsCapacity = value;
-            }
+            private set { SetMaxSeatsCapacity(value); }
         }
-        public int ReservedSeats { get; private set; }
+        public int BookedSeats { get; private set; }
 
         // CONSTRUCTOR
 
@@ -48,30 +37,59 @@ namespace csharp_gestore_eventi
             this.Title = title;
             this.Date = date;
             this.MaxSeatsCapacity = maxSeatsCapacity;
-            this.ReservedSeats = 0;
+            this.BookedSeats = 0;
         }
 
         // METHODS
-        private static void ValidateTitle(string title)
+
+        public void BookSeats(int seatsToBook)
+        {
+            ValidateSeatsToBook(seatsToBook);
+            this.BookedSeats += seatsToBook;
+
+            void ValidateSeatsToBook(int seatsToBook)
+            {
+                if (seatsToBook <= 0)
+                    throw new ArgumentException("Field must be greater than zero", "seatsToBook");
+
+                DateTime today = DateTime.Today;
+                if (today >= this.Date)
+                    throw new Exception("Cannot book seats, event is already ended");
+
+                if (this.BookedSeats + seatsToBook > this.MaxSeatsCapacity)
+                    throw new Exception($"Cannot book more than {this.MaxSeatsCapacity - this.BookedSeats} seats.");
+            }
+        }
+
+        // SETTERS
+        private void SetTitle(string title)
         {
             if (string.IsNullOrEmpty(title))
-                throw new ArgumentException("This field cannot be empty or null.","Title");
+                throw new ArgumentException("This field cannot be empty or null.", "Title");
+            else
+                this.title = title;
 
         }
 
-        private static void ValidateDate(DateTime date)
+        private void SetDate(DateTime date)
         {
             DateTime today = DateTime.Today;
             if (date <= today)
                 throw new ArgumentException($"Dates before {today.AddDays(1)} are not valid.", "Date");
+            else
+                this.date = date;
 
         }
 
-        private static void ValidateMaxSeatsCapacity(int seats)
+        private void SetMaxSeatsCapacity(int seats)
         {
             if (seats <= 0)
                 throw new ArgumentException("This field must be greater than zero", "MaxSeatsCapacity");
+            else
+                this.maxSeatsCapacity = seats;
 
         }
+
+
     }
 }
