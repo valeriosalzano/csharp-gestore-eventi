@@ -10,8 +10,14 @@ namespace csharp_gestore_eventi
 {
     internal class UpcomingEvents
     {
+        //ATTRIBUTES
+        private string title;
+
         // PROPERTIES
-        public string Title { get; private set; }
+        public string Title {
+            get { return title; }
+            private set { SetTitle(value); }
+        }
         public List<Event> Events { get; private set; }
 
         // CONSTRUCTOR
@@ -34,6 +40,17 @@ namespace csharp_gestore_eventi
             }
 
             return eventsFound;
+        }
+
+        // SETTERS
+
+        private void SetTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+                throw new ArgumentException("This field cannot be empty or null.", "Title");
+            else
+                this.title = title;
+
         }
 
         // METHODS

@@ -8,6 +8,7 @@ namespace csharp_gestore_eventi
         {
             string userChoice;
             Event userEvent;
+            UpcomingEvents userUpcomingEvents;
 
             do
             {
@@ -15,6 +16,7 @@ namespace csharp_gestore_eventi
                     @"
 ***** Menu *****
 1 - Crea un evento
+2 - Crea un programma di eventi
 0 - Esci
                     ");
                 userChoice = Console.ReadLine()?? "";
@@ -22,7 +24,10 @@ namespace csharp_gestore_eventi
                 switch (userChoice)
                 {
                     case "1":
-                        userEvent = CreateEvent();
+                        userEvent = CreateEventWithBookedSeats();
+                        break;
+                    case "2":
+                        userUpcomingEvents = CreateUpcomingEventsList();
                         break;
                     case "0":
                         Console.WriteLine("Arrivederci");
@@ -35,26 +40,11 @@ namespace csharp_gestore_eventi
             } while (userChoice != "0");
         }
 
-        public static Event CreateEvent() 
+        public static Event CreateEventWithBookedSeats() 
         {
-            string userTitle;
-            DateTime userDate;
-            int userSeatsCapacity;
-            Event userEvent;
             int userBookedSeats;
 
-            Console.WriteLine("--- Aggiunta di un evento ---");
-
-            Console.Write("Inserisci il nome dell'evento: ");
-            userTitle = Console.ReadLine() ?? "";
-
-            Console.Write("Inserisci la data dell'evento (gg/mm/yyyy): ");
-            userDate = DateTime.Parse(Console.ReadLine() ?? "");
-
-            Console.Write("Inserisci il numero di posti totali: ");
-            int.TryParse(Console.ReadLine(),out userSeatsCapacity);
-
-            userEvent = new Event(userTitle, userDate, userSeatsCapacity);
+            Event userEvent = CreateEvent();
 
             Console.Write("Quanti posti desideri prenotare? ");
             int.TryParse(Console.ReadLine(), out userBookedSeats);
@@ -84,6 +74,69 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
             }
 
             return userEvent;
+        }
+
+        public static Event CreateEvent()
+        {
+            string userTitle;
+            DateTime userDate;
+            int userSeatsCapacity;
+
+            Console.WriteLine("--- Aggiunta di un evento ---");
+
+            Console.Write("Inserisci il nome dell'evento: ");
+            userTitle = Console.ReadLine() ?? "";
+
+            Console.Write("Inserisci la data dell'evento (gg/mm/yyyy): ");
+            userDate = DateTime.Parse(Console.ReadLine() ?? "");
+
+            Console.Write("Inserisci il numero di posti totali: ");
+            int.TryParse(Console.ReadLine(), out userSeatsCapacity);
+
+            return new Event(userTitle, userDate, userSeatsCapacity);
+        }
+        public static UpcomingEvents CreateUpcomingEventsList()
+        {
+
+            string userTitle = GetTitleFromUser();
+
+            UpcomingEvents userUpcomingEvents = new UpcomingEvents(userTitle);
+
+            int eventsListCount = GetListLengthFromUser();
+
+            for(int i = 0; i < eventsListCount; i++)
+            {
+
+            }
+
+            string GetTitleFromUser()
+            {
+                string userTitle;
+                Console.Write("Inserisci il nome del tuo programma Eventi: ");
+                userTitle = Console.ReadLine();
+
+                while (string.IsNullOrEmpty(userTitle))
+                {
+                    Console.Write("Inserisci un nome valido.");
+                    userTitle = Console.ReadLine();
+                }
+                return userTitle;
+            }
+
+            int GetListLengthFromUser()
+            {
+                int eventsListCount;
+
+                Console.Write("Indica il numero di eventi da inserire: ");
+
+                while (!int.TryParse(Console.ReadLine(), out eventsListCount) || eventsListCount <= 0)
+                {
+                    Console.Write("Inserisci un valore valido: ");
+                }
+
+                return eventsListCount;
+
+            }
         }
     }
 }
