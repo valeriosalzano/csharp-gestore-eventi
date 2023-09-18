@@ -55,17 +55,17 @@ namespace csharp_gestore_eventi
         // METHODS
         public string GetFormattedDate()
         {
-            return this.Date.ToLongDateString();
+            return this.Date.ToString("dd/MM/yyyy");
         }
 
         public string GetFormattedPrice()
         {
-            return this.Price.ToString("0.00");
+            return this.Price.ToString("0.##");
         }
 
         public override string ToString()
         {
-            return $"{GetFormattedDate()} - {this.Title} - {this.Speaker} - {GetFormattedPrice}" ;
+            return $"{GetFormattedDate()} - {this.Title} - {this.Speaker} - {GetFormattedPrice()} euro" ;
         }
     }
 }

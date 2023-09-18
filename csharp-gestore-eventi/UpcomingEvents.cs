@@ -14,7 +14,8 @@ namespace csharp_gestore_eventi
         private string title = "";
 
         // PROPERTIES
-        public string Title {
+        public string Title 
+        {
             get { return title; }
             private set { SetTitle(value); }
         }

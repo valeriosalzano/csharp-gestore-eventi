@@ -1,27 +1,32 @@
 ﻿using System.Globalization;
 using System.Runtime.InteropServices;
+using ConsoleTables;
 
 namespace csharp_gestore_eventi
 {
     internal class Program
     {
+
         static void Main(string[] args)
         {
             string userChoice;
             Event userEvent;
-            UpcomingEvents userUpcomingEvents;
+            UpcomingEvents? userUpcomingEvents = null;
 
             do
             {
-                Console.WriteLine(
-                    @"
-***** Menu *****
-1 - Crea un evento (eccezioni non gestite)
-2 - Crea un programma di eventi
-3 - Crea un programma di eventi (BONUS)
-0 - Esci
-****************
-                    ");
+                var menu = new ConsoleTable("                   MENU");
+
+                menu.AddRow("1 - Crea un evento(eccezioni non gestite) e modifica i posti prenotati.");
+                menu.AddRow("2 - Crea un programma di eventi e cerca gli eventi per data.");
+                menu.AddRow("3 - Crea un programma di eventi e aggiungi una conferenza. (BONUS)");
+                if(userUpcomingEvents is not null)
+                    menu.AddRow("4 - Stampa l'attuale lista di eventi.");
+                menu.AddRow("0 - Esci");
+
+                Console.WriteLine("\n");
+                menu.Write();
+                Console.WriteLine("\n");
 
                 Console.Write("Inserisci il numero del comando desiderato: ");
                 userChoice = Console.ReadLine()?? "";
@@ -32,10 +37,14 @@ namespace csharp_gestore_eventi
                         userEvent = CreateEventWithBookedSeatsOperations();
                         break;
                     case "2":
-                        userUpcomingEvents = CreateUpcomingEventsList();
+                        userUpcomingEvents = CreateUpcomingEventsListAndSearchByDate();
                         break;
                     case "3":
                         userUpcomingEvents = CreateUpcomingEventsListWithConference();
+                        break;
+                    case "4":
+                        if(userUpcomingEvents is not null)
+                            Console.WriteLine(userUpcomingEvents);
                         break;
                     case "0":
                         Console.WriteLine("Arrivederci\n");
@@ -46,8 +55,11 @@ namespace csharp_gestore_eventi
 
                 }
             } while (userChoice != "0");
+
+            Console.WriteLine("\n--- Programma terminato ---\n");
         }
 
+        // PROGRAM OPTIONS
         public static Event CreateEventWithBookedSeatsOperations() 
         {
             int userBookedSeats;
@@ -55,158 +67,151 @@ namespace csharp_gestore_eventi
             Event userEvent = CreateEvent();
 
             Console.Write("Quanti posti desideri prenotare? ");
-            int.TryParse(Console.ReadLine(), out userBookedSeats);
+            userBookedSeats = GetValidPositiveIntegerFromUser();
+
             userEvent.BookSeats(userBookedSeats);
 
-            bool userCanCancel = true;
-            while(userCanCancel)
+            ModifyBookedSeats();
+            
+            return userEvent;
+
+            void ModifyBookedSeats()
             {
-                Console.Write("Vuoi disdire dei posti? (si/no) ");
-                if(Console.ReadLine() == "si")
-                {
-                    int userSeatsToCancel;
+                PrintBookedSeats();
 
-                    Console.Write("Indica il numero di posti da disdire: ");
-                    int.TryParse(Console.ReadLine(), out userSeatsToCancel);
-                    userEvent.CancelBookedSeats(userSeatsToCancel);
-
-                }else
+                string userAnswer = "";
+                while (userAnswer != "no" )
                 {
-                    userCanCancel = false;
-                    Console.WriteLine("Ok va bene!");
+                    Console.Write("Vuoi disdire dei posti? (si/no) ");
+                    userAnswer = GetValidStringFromUser().ToLower();
+
+                    if (userAnswer == "si")
+                    {
+                        int userSeatsToCancel;
+
+                        Console.Write("Indica il numero di posti da disdire: ");
+                        userSeatsToCancel = GetValidPositiveIntegerFromUser();
+
+                        userEvent.CancelBookedSeats(userSeatsToCancel);
+                        Console.WriteLine("Modifica effettuata con successo!");
+                        PrintBookedSeats();
+                    }
+                    else if (userAnswer == "no")
+                    {
+                        Console.WriteLine("Ok, va bene!");
+                        PrintBookedSeats();
+                    }
+                    else
+                        Console.WriteLine("Comando non riconosciuto.");
+
                 }
-                Console.WriteLine(@$"
-Numero di posti prenotati: {userEvent.BookedSeats}
-Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats}
-                ");
             }
 
-            return userEvent;
-        }
+            void PrintBookedSeats()
+            {
+                var seatsTable = new ConsoleTable("Numero di posti prenotati", "Numero di posti disponibili");
+                seatsTable.AddRow(userEvent.BookedSeats, userEvent.MaxSeatsCapacity - userEvent.BookedSeats);
 
+                Console.WriteLine();
+                seatsTable.Write();
+                Console.WriteLine();
+            }
+        }
+        public static UpcomingEvents CreateUpcomingEventsListAndSearchByDate()
+        {
+            UpcomingEvents userUpcomingEvents = CreateUpcomingEventsList();
+
+            PrintUpcomingEvents();
+
+            Console.Write("Inserisci una data per sapere che eventi ci saranno (gg/mm/yyyy): ");
+            DateTime userDate = GetValidDateFromUser();
+            List<Event> foundEvents = userUpcomingEvents.GetEventsByDate(userDate);
+
+            PrintFoundEvents();
+
+            return userUpcomingEvents;
+
+            
+            void PrintUpcomingEvents()
+            {
+                Console.WriteLine($"\nIl numero di eventi nel programma è: {userUpcomingEvents.CountEvents()} \nEcco il tuo programma eventi:\n{userUpcomingEvents.ToString()}");
+            }
+            void PrintFoundEvents()
+            {
+                if (foundEvents.Count > 0)
+                    foreach (Event _event in foundEvents)
+                        Console.WriteLine(_event.ToString());
+                else
+                    Console.WriteLine("Nessun evento trovato per la data selezionata.");
+            }
+        }
+        public static UpcomingEvents CreateUpcomingEventsListWithConference()
+        {
+            UpcomingEvents userUpcomingEvents = CreateUpcomingEventsList();
+
+            Console.WriteLine("\n---- BONUS ----\n\nAggiungiamo anche una conferenza!");
+            userUpcomingEvents.AddEvent(CreateConference());
+
+            Console.WriteLine($"\nEcco il tuo programma eventi con conferenza inclusa:\n{userUpcomingEvents}");
+            return userUpcomingEvents;
+        }
+        
+
+        // CLASS CREATION FUNCTIONS
         public static Event CreateEvent()
         {
+            Console.WriteLine("\n--- Crea un evento ---\n");
+
             string? userTitle;
             DateTime userDate;
             int userSeatsCapacity;
 
-            Console.WriteLine("\n--- Aggiunta di un evento ---\n");
-
             Console.Write("Inserisci il nome dell'evento: ");
-            userTitle = Console.ReadLine();
-            while(string.IsNullOrEmpty(userTitle))
-            {
-                Console.Write("Inserisci un titolo valido: ");
-                userTitle = Console.ReadLine();
-            }
+            userTitle = GetValidStringFromUser();
 
             Console.Write("Inserisci la data dell'evento (gg/mm/yyyy): ");
-            while (!DateTime.TryParseExact(Console.ReadLine(),"dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out userDate))
-            {
-                Console.Write("Inserisci un formato di data valido: ");
-            }
+            userDate = GetValidDateFromUser();
 
             Console.Write("Inserisci il numero di posti totali: ");
-            while(!int.TryParse(Console.ReadLine(), out userSeatsCapacity))
-            {
-                Console.Write("Inserisci un numero valido: ");
-            }
-            
+            userSeatsCapacity = GetValidPositiveIntegerFromUser();
 
             return new Event(userTitle, userDate, userSeatsCapacity);
         }
         public static UpcomingEvents CreateUpcomingEventsList()
         {
-            Console.WriteLine("\n--- Aggiunta di un nuovo programma di eventi ---\n");
+            Console.WriteLine("\n--- Crea un nuovo programma di eventi ---\n");
 
-            string userTitle = GetTitleFromUser();
+            Console.Write("Inserisci il nome del tuo programma di eventi: ");
+            string? userTitle = GetValidStringFromUser();
 
             UpcomingEvents userUpcomingEvents = new UpcomingEvents(userTitle);
 
-            int eventsListCount = GetListLengthFromUser();
+            Console.Write("Indica il numero di eventi da inserire: ");
+            int eventsListCount = GetValidPositiveIntegerFromUser();
 
-            while(userUpcomingEvents.CountEvents() < eventsListCount)
+            while (!IsEventsListFull())
+                AddNewEventToList();
+
+            return userUpcomingEvents;
+
+            bool IsEventsListFull()
+            {
+                return userUpcomingEvents.CountEvents() >= eventsListCount;
+            }
+            void AddNewEventToList()
             {
                 try
                 {
                     Event newEvent = CreateEvent();
                     userUpcomingEvents.Events.Add(newEvent);
 
-                }catch (Exception error) 
+                }
+                catch (Exception error)
                 {
+                    Console.WriteLine("Operazione non andata a buon fine.");
                     Console.WriteLine(error.Message);
                 }
             }
-
-            Console.WriteLine($"\nIl numero di eventi nel programma è: {userUpcomingEvents.CountEvents()} \nEcco il tuo programma eventi:\n{userUpcomingEvents.ToString()}");
-
-            DateTime searchedDate;
-            Console.Write("Inserisci una data per sapere che eventi ci saranno (gg/mm/yyyy): ");
-            while(!DateTime.TryParse(Console.ReadLine(),out searchedDate))
-            {
-                Console.Write("Inserisci un formato di data valido: ");
-            }
-            List<Event> eventsList = SearchEventsByDate(searchedDate);
-            if(eventsList.Count > 0)
-            {
-                foreach (Event _event in eventsList)
-                {
-                    Console.WriteLine(_event.ToString());
-                }
-            }
-            else
-            {
-                Console.WriteLine("Nessun evento trovato per la data selezionata.");
-            }
-
-            return userUpcomingEvents;
-
-            string GetTitleFromUser()
-            {
-                string? userTitle;
-                Console.Write("Inserisci il nome del tuo programma Eventi: ");
-                userTitle = Console.ReadLine();
-
-                while (string.IsNullOrEmpty(userTitle))
-                {
-                    Console.Write("Inserisci un nome valido: ");
-                    userTitle = Console.ReadLine();
-                }
-                return userTitle;
-            }
-
-            int GetListLengthFromUser()
-            {
-                int eventsListCount;
-
-                Console.Write("Indica il numero di eventi da inserire: ");
-
-                while (!int.TryParse(Console.ReadLine(), out eventsListCount) || eventsListCount <= 0)
-                {
-                    Console.Write("Inserisci un valore valido: ");
-                }
-
-                return eventsListCount;
-
-            }
-
-            List<Event> SearchEventsByDate(DateTime date)
-            {
-                List<Event> eventsFound = userUpcomingEvents.GetEventsByDate(date);
-
-                return eventsFound;
-            }
-        }
-
-        public static UpcomingEvents CreateUpcomingEventsListWithConference()
-        {
-            UpcomingEvents userUpcomingEvents = CreateUpcomingEventsList();
-
-            Console.WriteLine("---- BONUS ----\n\nAggiungiamo anche una conferenza!");
-            userUpcomingEvents.AddEvent(CreateConference());
-
-            Console.WriteLine($"\nIEcco il tuo programma eventi con conferenza inclusa:\n{userUpcomingEvents.ToString()}");
-            return userUpcomingEvents;
         }
         public static Conference CreateConference()
         {
@@ -254,5 +259,36 @@ Numero di posti disponibili: {userEvent.MaxSeatsCapacity - userEvent.BookedSeats
 
             return new Conference(userTitle, userDate, userSeatsCapacity, userSpeaker, userPrice);
         }
+
+        // USER INPUT FUNCTIONS
+        public static string GetValidStringFromUser()
+        {
+            string? userInput = Console.ReadLine();
+            while (string.IsNullOrEmpty(userInput))
+            {
+                Console.Write("Inserisci un valore valido: ");
+                userInput = Console.ReadLine();
+            }
+            return userInput;
+        }
+        public static DateTime GetValidDateFromUser()
+        {
+            DateTime userInput;
+            while (!DateTime.TryParseExact(Console.ReadLine(), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out userInput))
+            {
+                Console.Write("Inserisci un formato di data valido: ");
+            }
+            return userInput;
+        }
+        public static int GetValidPositiveIntegerFromUser()
+        {
+            int userInput;
+            while (!int.TryParse(Console.ReadLine(), out userInput) || userInput <= 0)
+            {
+                Console.Write("Inserisci un numero positivo valido: ");
+            }
+            return userInput;
+        }
+
     }
 }
